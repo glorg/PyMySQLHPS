@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 # License GNU Public License GPL-2.0 http://opensource.org/licenses/gpl-2.0
-# Created by Eugene K., 2019
+# Created by Eugene K., 2019-2020
 import pymysql
 import datetime
 import os
 import time
 import hashlib
 from settings import *
+from commons import *
 
 while True:
 #read passowrd from .my.cnf
@@ -29,13 +30,14 @@ while True:
         stf=open(stfile,"a")
 #get my PID ant print header
         me=os.getpid()
-        print("Started monitor with PID %i"%me)
+        print(logline(verbose,verboselog,logfile,"Started monitor with PID %i"%me,True))
         print("#monitor PID:%i"%me,file=stf)
         print("#Date-time\t\ttime to fetch, uS\tnumber of rows\tlongest running query time, S",file=stf)
     #try:
         while True:
 #get time...
             hrtstamp=datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+            logline(verbose,verboselog,logfile,"Snapshot at %s... " % hrtstamp,False)
             filesuffix=hashlib.md5(hrtstamp.encode('utf-8')).hexdigest()[0:10]
             fname=snapdirectory+"sqlprocesses-"+hrtstamp+"."+filesuffix+".log"
             t1=datetime.datetime.now()
@@ -58,8 +60,8 @@ while True:
                 fsf.close()
                 print("%s\t%s\t\t\t%i\t\t%s" % (hrtstamp,str(round(1000000*td.total_seconds())),nr,maxtime),file=stf)
                 stf.flush()
+            logline(verbose,verboselog,logfile,"done.",True)
             time.sleep(interval)
-            print(hrtstamp)
     except pymysql.Error as e:
         print("%s" % format(e))
         print("...could not query sql processes, will sleep for %d seconds..." % interval)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # This is viewer for processlists collected by pymysqlphs utility
 # License GNU Public License GPL-2.0 http://opensource.org/licenses/gpl-2.0
-# Created by Eugene K., 2019
+# Created by Eugene K., 2019-2020
 import pymysql
 import datetime
 import os
@@ -11,6 +11,7 @@ import curses
 import re
 import sys
 from settings import *
+from commons import *
 
 def readfilelist():
     files = []
@@ -31,14 +32,24 @@ def getfilelines(filename):
 
 def display(stdscr):
     stdscr.clear()
+    #get page size for PgUp/PgDn scrolling
+    #One line is used for header, thus page is actually 1 line shorter
+    scrheight,scrwidth = stdscr.getmaxyx()
+    pageheight = min(scrheight,scrwidth)-1
+    logline(False,verboselog,logfile,'Opened curses scrren with size %d; '%pageheight,False)
+    #read files to display into array, scrolling between these files will be available
+    #TODO: once auto file rotation will be enabled, these files should automatically be rescanned
     files=readfilelist()
     maxlistposition=len(files)-1
+    logline(False,verboselog,logfile,'Found %d file(s) to display'%maxlistposition,True)
+    #point position to some file pointed by mask if uesr provides it
     if defaultline!='':
         for f in files:
             if defaultline in f:
                listposition=files.index(f)
     else:
         listposition=len(files)-1
+    #following variable used for scrolling, it points to number of files to skip while printing others
     skiplines=0
     while True:
         try:
@@ -80,10 +91,25 @@ def display(stdscr):
        	       	       	       	 listposition=0
             elif keypressed == curses.KEY_UP:
                              skiplines=skiplines-1
+                             stdscr.clear()
                              if skiplines<=0:
-                                 skiplines
+                                 skiplines=0
             elif keypressed == curses.KEY_DOWN:
                              skiplines=skiplines+1
+                             stdscr.clear()
+                             if (skiplines>=(len(lines)-1)):
+                                 skiplines=len(lines)-1
+            elif keypressed == curses.KEY_HOME:
+                             stdscr.clear()
+                             skiplines=0
+            elif keypressed == curses.KEY_PPAGE:
+                             skiplines=skiplines-pageheight
+                             stdscr.clear()
+                             if skiplines<=0:
+                                 skiplines=0
+            elif keypressed == curses.KEY_NPAGE:
+                             skiplines=skiplines+pageheight
+                             stdscr.clear()
                              if (skiplines>=(len(lines)-1)):
                                  skiplines=len(lines)-1
             else:
