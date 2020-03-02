@@ -63,12 +63,12 @@ while True:
             logline(verbose,verboselog,logfile,"done.",True)
             time.sleep(interval)
     except pymysql.Error as e:
-        print("%s" % format(e))
-        print("...could not query sql processes, will sleep for %d seconds..." % interval)
+        logline(verbose,verboselog,logfile,"%s" % format(e),True)
+        logline(verbose,verboselog,logfile,"...could not query sql processes, will sleep for %d seconds..." % interval,True)
         time.sleep(interval)
     except Exception as e:
-        print("%s" % format(e))
-        print("unknown error or user interrupt received...")
+        logline(verbose,verboselog,logfile,"%s" % format(e),True)
+        logline(verbose,verboselog,logfile,"unknown error or user interrupt received...",True)
         connection.close()
         stf.close()
     #    exit
