@@ -9,7 +9,7 @@ This monitoring tool can be useful if you are looking for some kind of SQL query
 ## How this tool works
 
 The tool has two components: 
-* daemon (pymysqlhps.py) part that should run in the background. It will connect to MySQL, take processlist snapshots in certain periods and save them into configured directory
+* daemon (pymysqlhps.py) part that should run in the background. It will connect to MySQL, take processlist snapshots in certain periods and save them into configured directory. On startup it writes snapshots to the directory set in settings.py file and also appends file named sqlprocesses.briefs.log containing statistics.
 At the moment script can;t daemonize and rotate snapshots itself yet, so you have to start it in, for example, screen.
 * viewer part (pyhpsviewer.py, that is in fact curses interface) for browsing processlist snapshots. One can start viewer with _./pyhpsviewer.py_ command and browse processlists. You can also point specific moment you want to see in the form of
 
