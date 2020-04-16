@@ -22,6 +22,9 @@ while True:
 #ensure configured log directory exists
     if not os.path.exists(snapdirectory):
         os.makedirs(snapdirectory)
+#if "vertical" is set, parse columns
+    column=columns.split(',')
+    header_lenmax=len(max(column, key=len))
     try:
 #establish mysql connection, it will NOT be closed while script is running
         connection = pymysql.connect(host=mysqlhost, user=mysqluser, password=mysqlpasswd)
@@ -53,9 +56,14 @@ while True:
 #open STAMP files, print results...
                 fsf=open(fname,"a")
                 for row in cursor.fetchall():
-                    for i in range(0,len(row)-1):
-                         print("%s\t" % row[i], end = '',file=fsf)
-                    print("\t\t%s" % row[len(row)-1],file=fsf)
+                    if not vertical:
+                        for i in range(0,len(row)-1):
+                            print("%s\t" % row[i], end = '',file=fsf)
+                        print("\t\t%s" % row[len(row)-1],file=fsf)
+                    else:
+                        for i in range(0,len(row)):
+                            print( "%s : %s" % ('{0: >{l}}'.format(column[i],l=header_lenmax),row[i]),file=fsf)
+                        print('*******************************************************************',file=fsf)
                     maxtime=row[1]
                 fsf.close()
                 print("%s\t%s\t\t\t%i\t\t%s" % (hrtstamp,str(round(1000000*td.total_seconds())),nr,maxtime),file=stf)
